@@ -32,9 +32,14 @@ func main() {
 		log.Fatal("No/Incorrect PORT provided in the env vars")
 	}
 
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "development"
+	}
+
 	cfg := config{
-		port,
-		"development", // for dev env only
+		port: port,
+		env:  env,
 	}
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
