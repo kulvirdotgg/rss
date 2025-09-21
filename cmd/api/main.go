@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"rss/internal/logger"
 	"strconv"
 	"time"
 
@@ -20,7 +21,7 @@ type config struct {
 
 type application struct {
 	config config
-	logger *log.Logger
+	logger *logger.Logger
 }
 
 func main() {
@@ -42,7 +43,7 @@ func main() {
 		env:  env,
 	}
 
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	logger := logger.New(os.Stdout, logger.LevelInfo)
 
 	app := &application{
 		config: cfg,
@@ -52,14 +53,17 @@ func main() {
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
 		Handler:      app.routes(),
+		ErrorLog:     log.New(logger, "", 0),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
 
-	logger.Printf("starting %s server on %s", cfg.env, srv.Addr)
+	logger.PrintInfo("starting server", map[string]string{
+		"addr": srv.Addr,
+		"env":  cfg.env,
+	})
+
 	err = srv.ListenAndServe()
-	if err != nil {
-		logger.Fatal(err)
-	}
+	logger.PrintFatal(err, nil)
 }
