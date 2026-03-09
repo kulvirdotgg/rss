@@ -21,6 +21,10 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 	}
 }
 
+func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+}
+
 func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request, err error) {
 	app.logError(r, err)
 
