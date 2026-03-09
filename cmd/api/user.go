@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"rss/internal/data"
+	"rss/internal/validator"
 )
 
 func (app *application) getUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,6 +33,17 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 	err := app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	user := &data.User{
+		Name: input.Name,
+	}
+
+	v := validator.New()
+	if data.ValidateUser(v, user); !v.Valid() {
+		app.validationFailedResponse(w, r, v.Errors)
+		return
 	}
 
 	fmt.Fprintf(w, "%+v\n", input)
